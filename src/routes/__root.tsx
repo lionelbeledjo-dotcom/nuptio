@@ -82,10 +82,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Nuptio — Vos invitations de mariage, réinventées" },
       { name: "description", content: "Créez, personnalisez et gérez vos invitations de mariage digitales. RSVP, plan de table, gestion des invités — tout au même endroit." },
       { name: "author", content: "Nuptio" },
-      { property: "og:title", content: "Nuptio — Invitations de mariage digitales" },
-      { property: "og:description", content: "La plateforme élégante pour créer vos invitations de mariage et gérer vos invités." },
+      { property: "og:title", content: "Nuptio — Vos invitations de mariage, réinventées" },
+      { property: "og:description", content: "Créez, personnalisez et gérez vos invitations de mariage digitales. RSVP, plan de table, gestion des invités — tout au même endroit." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Nuptio — Vos invitations de mariage, réinventées" },
+      { name: "twitter:description", content: "Créez, personnalisez et gérez vos invitations de mariage digitales. RSVP, plan de table, gestion des invités — tout au même endroit." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/45cfcdca-c621-4aa1-aa8a-9189a5872798/id-preview-ea14a096--df2e67d1-ed50-44b9-8240-6708050293a9.lovable.app-1783450820180.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/45cfcdca-c621-4aa1-aa8a-9189a5872798/id-preview-ea14a096--df2e67d1-ed50-44b9-8240-6708050293a9.lovable.app-1783450820180.png" },
     ],
     links: [
       {
