@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
+import { Route as AuthenticatedDashboardRsvpRouteImport } from './routes/_authenticated/dashboard.rsvp'
 import { Route as AuthenticatedDashboardInvitationRouteImport } from './routes/_authenticated/dashboard.invitation'
 import { Route as AuthenticatedDashboardGuestsRouteImport } from './routes/_authenticated/dashboard.guests'
 
@@ -42,6 +43,12 @@ const AuthenticatedDashboardIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardRsvpRoute =
+  AuthenticatedDashboardRsvpRouteImport.update({
+    id: '/rsvp',
+    path: '/rsvp',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardInvitationRoute =
   AuthenticatedDashboardInvitationRouteImport.update({
     id: '/invitation',
@@ -61,6 +68,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
+  '/dashboard/rsvp': typeof AuthenticatedDashboardRsvpRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -68,6 +76,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
+  '/dashboard/rsvp': typeof AuthenticatedDashboardRsvpRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -78,6 +87,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/_authenticated/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
+  '/_authenticated/dashboard/rsvp': typeof AuthenticatedDashboardRsvpRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -88,6 +98,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/guests'
     | '/dashboard/invitation'
+    | '/dashboard/rsvp'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard/guests'
     | '/dashboard/invitation'
+    | '/dashboard/rsvp'
     | '/dashboard'
   id:
     | '__root__'
@@ -104,6 +116,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/dashboard/guests'
     | '/_authenticated/dashboard/invitation'
+    | '/_authenticated/dashboard/rsvp'
     | '/_authenticated/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -150,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/rsvp': {
+      id: '/_authenticated/dashboard/rsvp'
+      path: '/rsvp'
+      fullPath: '/dashboard/rsvp'
+      preLoaderRoute: typeof AuthenticatedDashboardRsvpRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/invitation': {
       id: '/_authenticated/dashboard/invitation'
       path: '/invitation'
@@ -170,6 +190,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardGuestsRoute: typeof AuthenticatedDashboardGuestsRoute
   AuthenticatedDashboardInvitationRoute: typeof AuthenticatedDashboardInvitationRoute
+  AuthenticatedDashboardRsvpRoute: typeof AuthenticatedDashboardRsvpRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
@@ -178,6 +199,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardGuestsRoute: AuthenticatedDashboardGuestsRoute,
     AuthenticatedDashboardInvitationRoute:
       AuthenticatedDashboardInvitationRoute,
+    AuthenticatedDashboardRsvpRoute: AuthenticatedDashboardRsvpRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 
