@@ -165,9 +165,9 @@ function RsvpForm({ token, existing, wedding }: { token: string; existing: any; 
       _token: token,
       _attending: attending,
       _number_of_people: number,
-      _menu_choice: menu || null,
-      _allergies: allergies || null,
-      _message: message || null,
+      _menu_choice: menu || "",
+      _allergies: allergies || "",
+      _message: message || "",
     });
     setSaving(false);
     if (error) return toast.error("Erreur : " + error.message);
