@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, Mail, Users, ClipboardCheck, LayoutGrid, Info, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Mail, Users, ClipboardCheck, LayoutGrid, Info, Settings, LogOut, ShieldCheck } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar,
@@ -7,6 +7,7 @@ import {
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAdmin } from "@/hooks/useAdmin";
 
 const items = [
   { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard, exact: true },
@@ -24,6 +25,7 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { data: isAdmin } = useAdmin();
 
   const isActive = (url: string, exact?: boolean) => (exact ? pathname === url : pathname === url || pathname.startsWith(url + "/"));
 
@@ -57,6 +59,24 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {isAdmin && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/dashboard/admin")}>
+                    <Link to="/dashboard/admin" className="flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4" />
+                      {!collapsed && <span>Panel Admin</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>

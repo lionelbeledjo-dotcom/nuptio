@@ -1,80 +1,125 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useWedding, useInvalidateWedding } from "@/hooks/useWedding";
+import { useState } from "react";
+import { useEvent, useInvalidateEvent } from "@/hooks/useEvent";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, Clock, XCircle, Heart, Users, Calendar } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, Users, Calendar, Heart, Cake, Baby, Gift, Sparkles } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { toast } from "sonner";
+import { EVENT_TYPES, getEventLabels, type EventType } from "@/lib/constants";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   component: DashboardHome,
 });
 
 function DashboardHome() {
-  const { data: wedding, isLoading } = useWedding();
-
+  const { data: event, isLoading } = useEvent();
   if (isLoading) return <div className="p-8 text-muted-foreground">Chargement…</div>;
-  if (!wedding) return <OnboardingForm />;
-  return <DashboardContent weddingId={wedding.id} weddingDate={wedding.wedding_date} />;
+  if (!event) return <OnboardingForm />;
+  return <DashboardContent eventId={event.id} eventDate={event.wedding_date} />;
 }
 
+const iconMap: Record<string, React.ElementType> = {
+  Heart, Cake, Baby, Gift, Sparkles,
+};
+
 function OnboardingForm() {
-  const invalidate = useInvalidateWedding();
+  const invalidate = useInvalidateEvent();
+  const [eventType, setEventType] = useState<EventType | null>(null);
   const [p1, setP1] = useState("");
   const [p2, setP2] = useState("");
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const labels = getEventLabels(eventType);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!eventType) return toast.error("Choisissez un type d'événement");
     setLoading(true);
     const { data: userData } = await supabase.auth.getUser();
     if (!userData.user) return;
     const { error } = await supabase.from("weddings").insert({
       user_id: userData.user.id,
       partner1_name: p1,
-      partner2_name: p2,
+      partner2_name: p2 || p1,
       wedding_date: date || null,
+      template_id: eventType,
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Votre mariage est créé !");
+    toast.success(`Votre ${labels.title} est créé !`);
     invalidate();
   }
 
   return (
-    <div className="max-w-xl mx-auto p-8">
+    <div className="max-w-2xl mx-auto p-8">
       <div className="text-center mb-8">
-        <Heart className="h-10 w-10 text-gold mx-auto" />
-        <h1 className="font-display text-3xl mt-4">Créons votre mariage</h1>
-        <p className="text-muted-foreground mt-2">Renseignez les infos de base pour commencer.</p>
+        <Sparkles className="h-10 w-10 text-gold mx-auto" />
+        <h1 className="font-display text-3xl mt-4">Créons votre événement</h1>
+        <p className="text-muted-foreground mt-2">Quel type d'invitation souhaitez-vous créer ?</p>
       </div>
-      <Card className="p-6 border-border/60">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div><Label>Prénom marié·e 1</Label><Input required value={p1} onChange={(e) => setP1(e.target.value)} /></div>
-            <div><Label>Prénom marié·e 2</Label><Input required value={p2} onChange={(e) => setP2(e.target.value)} /></div>
-          </div>
-          <div><Label>Date du mariage</Label><Input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
-          <Button type="submit" disabled={loading} className="w-full bg-gold text-gold-foreground hover:bg-gold/90">
-            {loading ? "Création…" : "Créer mon mariage"}
-          </Button>
-        </form>
-      </Card>
+
+      {/* Event type selection */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+        {EVENT_TYPES.map((type) => {
+          const Icon = iconMap[type.icon] ?? Sparkles;
+          const isSelected = eventType === type.id;
+          return (
+            <button
+              key={type.id}
+              type="button"
+              onClick={() => setEventType(type.id as EventType)}
+              className={`p-4 rounded-xl border-2 transition-all text-center ${
+                isSelected
+                  ? "border-gold bg-gold/5 shadow-md scale-[1.02]"
+                  : "border-border/60 bg-white hover:border-gold/40 hover:bg-blush/20"
+              }`}
+            >
+              <Icon className={`h-8 w-8 mx-auto mb-2 ${isSelected ? "text-gold" : type.color}`} />
+              <span className={`text-sm font-medium ${isSelected ? "text-gold" : "text-ink"}`}>{type.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Form appears after choosing type */}
+      {eventType && (
+        <Card className="p-6 border-border/60 animate-in fade-in slide-in-from-bottom-2">
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <Label>{labels.person1}</Label>
+                <Input required value={p1} onChange={(e) => setP1(e.target.value)} placeholder="Prénom / Nom" />
+              </div>
+              <div>
+                <Label>{labels.person2}</Label>
+                <Input value={p2} onChange={(e) => setP2(e.target.value)} placeholder={eventType === "ceremony" ? "Optionnel" : "Prénom / Nom"} />
+              </div>
+            </div>
+            <div>
+              <Label>{labels.date}</Label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <Button type="submit" disabled={loading} className="w-full bg-gold text-gold-foreground hover:bg-gold/90">
+              {loading ? "Création…" : `Créer mon ${labels.title}`}
+            </Button>
+          </form>
+        </Card>
+      )}
     </div>
   );
 }
 
-function DashboardContent({ weddingId, weddingDate }: { weddingId: string; weddingDate: string | null }) {
+function DashboardContent({ eventId, eventDate }: { eventId: string; eventDate: string | null }) {
   const { data: stats } = useQuery({
-    queryKey: ["rsvp-stats", weddingId],
+    queryKey: ["rsvp-stats", eventId],
     queryFn: async () => {
-      const { data: guests } = await supabase.from("guests").select("id").eq("wedding_id", weddingId);
+      const { data: guests } = await supabase.from("guests").select("id").eq("wedding_id", eventId);
       const guestIds = (guests ?? []).map((g) => g.id);
       if (guestIds.length === 0) return { total: 0, yes: 0, no: 0, pending: 0 };
       const { data: responses } = await supabase.from("rsvp_responses").select("attending, guest_id").in("guest_id", guestIds);
@@ -86,11 +131,7 @@ function DashboardContent({ weddingId, weddingDate }: { weddingId: string; weddi
     },
   });
 
-  const [countdown, setCountdown] = useState<number | null>(null);
-  useEffect(() => {
-    if (!weddingDate) return;
-    setCountdown(differenceInDays(new Date(weddingDate), new Date()));
-  }, [weddingDate]);
+  const countdown = eventDate ? differenceInDays(new Date(eventDate), new Date()) : null;
 
   return (
     <div className="p-6 md:p-10 space-y-8">
@@ -99,7 +140,7 @@ function DashboardContent({ weddingId, weddingDate }: { weddingId: string; weddi
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">Compte à rebours</p>
             <div className="font-display text-6xl text-gold mt-2">{countdown ?? "—"}</div>
-            <p className="text-sm text-muted-foreground mt-1">jours avant le grand jour</p>
+            <p className="text-sm text-muted-foreground mt-1">jours avant le jour J</p>
           </div>
           <Calendar className="h-16 w-16 text-gold/40" />
         </div>
@@ -116,7 +157,7 @@ function DashboardContent({ weddingId, weddingDate }: { weddingId: string; weddi
         <h2 className="font-display text-2xl mb-4">Checklist rapide</h2>
         <ul className="space-y-3 text-sm">
           {[
-            { done: true, label: "Créer votre mariage" },
+            { done: true, label: "Créer votre événement" },
             { done: false, label: "Personnaliser votre invitation", link: "/dashboard/invitation" },
             { done: false, label: "Ajouter vos invités", link: "/dashboard/guests" },
             { done: false, label: "Renseigner les infos pratiques", link: "/dashboard/info" },

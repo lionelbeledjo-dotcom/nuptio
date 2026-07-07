@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardRsvpRouteImport } from './routes/_authen
 import { Route as AuthenticatedDashboardInvitationRouteImport } from './routes/_authenticated/dashboard.invitation'
 import { Route as AuthenticatedDashboardInfoRouteImport } from './routes/_authenticated/dashboard.info'
 import { Route as AuthenticatedDashboardGuestsRouteImport } from './routes/_authenticated/dashboard.guests'
+import { Route as AuthenticatedDashboardAdminRouteImport } from './routes/_authenticated/dashboard.admin'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -88,12 +89,19 @@ const AuthenticatedDashboardGuestsRoute =
     path: '/guests',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardAdminRoute =
+  AuthenticatedDashboardAdminRouteImport.update({
+    id: '/admin',
+    path: '/admin',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/invite/$token': typeof InviteTokenRoute
+  '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/dashboard/info': typeof AuthenticatedDashboardInfoRoute
   '/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/dashboard/info': typeof AuthenticatedDashboardInfoRoute
   '/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
@@ -121,6 +130,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/invite/$token': typeof InviteTokenRoute
+  '/_authenticated/dashboard/admin': typeof AuthenticatedDashboardAdminRoute
   '/_authenticated/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/_authenticated/dashboard/info': typeof AuthenticatedDashboardInfoRoute
   '/_authenticated/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/invite/$token'
+    | '/dashboard/admin'
     | '/dashboard/guests'
     | '/dashboard/info'
     | '/dashboard/invitation'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/invite/$token'
+    | '/dashboard/admin'
     | '/dashboard/guests'
     | '/dashboard/info'
     | '/dashboard/invitation'
@@ -162,6 +174,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/invite/$token'
+    | '/_authenticated/dashboard/admin'
     | '/_authenticated/dashboard/guests'
     | '/_authenticated/dashboard/info'
     | '/_authenticated/dashboard/invitation'
@@ -264,10 +277,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardGuestsRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/admin': {
+      id: '/_authenticated/dashboard/admin'
+      path: '/admin'
+      fullPath: '/dashboard/admin'
+      preLoaderRoute: typeof AuthenticatedDashboardAdminRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
   }
 }
 
 interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardAdminRoute: typeof AuthenticatedDashboardAdminRoute
   AuthenticatedDashboardGuestsRoute: typeof AuthenticatedDashboardGuestsRoute
   AuthenticatedDashboardInfoRoute: typeof AuthenticatedDashboardInfoRoute
   AuthenticatedDashboardInvitationRoute: typeof AuthenticatedDashboardInvitationRoute
@@ -279,6 +300,7 @@ interface AuthenticatedDashboardRouteChildren {
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
+    AuthenticatedDashboardAdminRoute: AuthenticatedDashboardAdminRoute,
     AuthenticatedDashboardGuestsRoute: AuthenticatedDashboardGuestsRoute,
     AuthenticatedDashboardInfoRoute: AuthenticatedDashboardInfoRoute,
     AuthenticatedDashboardInvitationRoute:
