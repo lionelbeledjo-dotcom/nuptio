@@ -8,6 +8,7 @@ import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAdmin } from "@/hooks/useAdmin";
+import { ADMIN_EMAILS } from "@/lib/constants";
 
 const items = [
   { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard, exact: true },
@@ -66,8 +67,8 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/dashboard/admin")}>
-                    <Link to="/dashboard/admin" className="flex items-center gap-2">
+                  <SidebarMenuButton asChild>
+                    <Link to="/admin" className="flex items-center gap-2">
                       <ShieldCheck className="h-4 w-4" />
                       {!collapsed && <span>Panel Admin</span>}
                     </Link>
