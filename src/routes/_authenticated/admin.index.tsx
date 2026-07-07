@@ -9,6 +9,7 @@ import { fr } from "date-fns/locale";
 import { getEventLabel } from "@/lib/constants";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
+  ssr: false,
   component: AdminDashboard,
 });
 

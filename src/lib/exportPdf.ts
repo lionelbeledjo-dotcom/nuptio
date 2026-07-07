@@ -1,6 +1,3 @@
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
-
 const GOLD_COLOR = "#D4A574";
 const A5_WIDTH_MM = 148;
 const A5_HEIGHT_MM = 210;
@@ -16,6 +13,11 @@ export async function exportInvitationPdf(
     throw new Error(`Element with id "${elementId}" not found.`);
   }
 
+  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+    import("html2canvas"),
+    import("jspdf"),
+  ]);
+
   const canvas = await html2canvas(element, {
     scale: 3,
     useCORS: true,
@@ -30,7 +32,6 @@ export async function exportInvitationPdf(
     format: "a5",
   });
 
-  // Draw gold border
   pdf.setDrawColor(GOLD_COLOR);
   pdf.setLineWidth(0.8);
   pdf.roundedRect(
@@ -43,10 +44,9 @@ export async function exportInvitationPdf(
     "S"
   );
 
-  // Calculate image dimensions to fit within borders with padding
   const contentMargin = BORDER_MM + 3;
   const maxWidth = A5_WIDTH_MM - contentMargin * 2;
-  const maxHeight = A5_HEIGHT_MM - contentMargin * 2 - 8; // reserve space for watermark
+  const maxHeight = A5_HEIGHT_MM - contentMargin * 2 - 8;
 
   const imgAspectRatio = canvas.width / canvas.height;
   let imgWidth = maxWidth;
@@ -63,7 +63,6 @@ export async function exportInvitationPdf(
   const imgData = canvas.toDataURL("image/png");
   pdf.addImage(imgData, "PNG", xOffset, yOffset, imgWidth, imgHeight);
 
-  // Add discrete watermark
   pdf.setFontSize(WATERMARK_FONT_SIZE);
   pdf.setTextColor(GOLD_COLOR);
   pdf.text(

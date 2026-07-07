@@ -24,6 +24,7 @@ import { exportInvitationPdf } from "@/lib/exportPdf";
 import { QRInvite } from "@/components/QRInvite";
 
 export const Route = createFileRoute("/_authenticated/dashboard/invitation")({
+  ssr: false,
   component: InvitationPage,
 });
 

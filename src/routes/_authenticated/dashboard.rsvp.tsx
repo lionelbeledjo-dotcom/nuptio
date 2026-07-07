@@ -9,6 +9,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard/rsvp")({
+  ssr: false,
   component: RsvpPage,
 });
 

@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, Copy, Upload } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/guests")({
+  ssr: false,
   component: GuestsPage,
 });
 

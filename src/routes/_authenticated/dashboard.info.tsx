@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/info")({
+  ssr: false,
   component: InfoPage,
 });
 

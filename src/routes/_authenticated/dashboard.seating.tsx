@@ -23,6 +23,7 @@ import {
 } from "@dnd-kit/core";
 
 export const Route = createFileRoute("/_authenticated/dashboard/seating")({
+  ssr: false,
   component: SeatingPage,
 });
 

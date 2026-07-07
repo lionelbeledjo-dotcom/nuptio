@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings")({
+  ssr: false,
   component: SettingsPage,
 });
 

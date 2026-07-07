@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { EVENT_TYPES, getEventLabels, type EventType } from "@/lib/constants";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
+  ssr: false,
   component: DashboardHome,
 });
 
