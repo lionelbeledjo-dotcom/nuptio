@@ -152,9 +152,9 @@ function InvitePage() {
 function RsvpForm({ token, existing, wedding }: { token: string; existing: any; wedding: any }) {
   const [attending, setAttending] = useState<string>(existing?.attending ?? "yes");
   const [number, setNumber] = useState<number>(existing?.number_of_people ?? 1);
-  const [menu, setMenu] = useState<string>(existing?.menu_choice ?? "");
-  const [allergies, setAllergies] = useState<string>(existing?.allergies ?? "");
-  const [message, setMessage] = useState<string>(existing?.message ?? "");
+  const [menu, setMenu] = useState<string>((existing?.menu_choice as string) ?? "");
+  const [allergies, setAllergies] = useState<string>((existing?.allergies as string) ?? "");
+  const [message, setMessage] = useState<string>((existing?.message as string) ?? "");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(!!existing);
 
