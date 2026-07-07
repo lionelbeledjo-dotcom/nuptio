@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import { useWedding, useInvalidateWedding } from "@/hooks/useWedding";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { FileDown, QrCode, ImagePlus, X } from "lucide-react";
+import { FileDown, QrCode, ImagePlus, X, ExternalLink } from "lucide-react";
 import { TemplateGrid, EVENT_TYPES, TEMPLATES } from "@/components/templates/EventTemplates";
 import { exportInvitationPdf } from "@/lib/exportPdf";
 import { QRInvite } from "@/components/QRInvite";
@@ -42,6 +43,20 @@ function InvitationPage() {
   const [customPhotos, setCustomPhotos] = useState<string[]>([]);
   const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [exporting, setExporting] = useState(false);
+
+  const { data: firstGuest } = useQuery({
+    queryKey: ["first-guest-invite", wedding?.id],
+    enabled: !!wedding,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("guests")
+        .select("invite_token")
+        .eq("wedding_id", wedding!.id)
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
 
   useEffect(() => {
     if (wedding) {
@@ -144,7 +159,9 @@ function InvitationPage() {
     }
   }
 
-  const invitationUrl = `${window.location.origin}/invitation/${wedding.id}`;
+  const invitationUrl = firstGuest?.invite_token
+    ? `${window.location.origin}/invite/${firstGuest.invite_token}`
+    : `${window.location.origin}/invite/preview`;
 
   const previewData = {
     name1: form.partner1_name || (isWedding ? "Prenom 1" : "Organisateur"),
@@ -161,13 +178,22 @@ function InvitationPage() {
   return (
     <div className="p-6 md:p-10 min-h-screen">
       {/* Header */}
-      <div className="mb-10">
-        <h1 className="font-display text-3xl md:text-4xl" style={{ color: "#2D2D2D" }}>
-          Mon invitation
-        </h1>
-        <p className="text-muted-foreground mt-2 text-base">
-          Configurez le type d'evenement, choisissez un template et personnalisez votre invitation.
-        </p>
+      <div className="mb-10 flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="font-display text-3xl md:text-4xl" style={{ color: "#2D2D2D" }}>
+            Mon invitation
+          </h1>
+          <p className="text-muted-foreground mt-2 text-base">
+            Configurez le type d'événement, choisissez un template et personnalisez votre invitation.
+          </p>
+        </div>
+        {firstGuest?.invite_token && (
+          <Button variant="outline" asChild>
+            <a href={`${window.location.origin}/invite/${firstGuest.invite_token}`} target="_blank" rel="noreferrer">
+              <ExternalLink className="h-4 w-4 mr-2" />Aperçu invité
+            </a>
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
@@ -285,46 +311,86 @@ function InvitationPage() {
               Photos
             </h2>
             <p className="text-sm text-muted-foreground">
-              Ajoutez jusqu'a 6 photos pour personnaliser votre invitation (URLs).
+              Ajoutez jusqu'à 6 photos pour personnaliser votre invitation.
             </p>
 
             {/* Existing photos */}
             {customPhotos.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {customPhotos.map((url, i) => (
                   <div
                     key={i}
-                    className="flex items-center gap-2 rounded-lg border border-border/60 p-2 bg-muted/20"
+                    className="relative group rounded-lg border border-border/60 overflow-hidden bg-muted/20 aspect-square"
                   >
-                    <div className="flex-1 truncate text-xs text-muted-foreground">{url}</div>
+                    <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = ""; (e.target as HTMLImageElement).alt = "Erreur de chargement"; }} />
                     <button
                       onClick={() => removePhoto(i)}
-                      className="shrink-0 w-6 h-6 rounded-full bg-red-100 hover:bg-red-200 flex items-center justify-center transition"
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
                     >
-                      <X className="w-3 h-3 text-red-600" />
+                      <X className="w-3 h-3" />
                     </button>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Add photo URL */}
-            <div className="flex gap-2">
-              <Input
-                value={newPhotoUrl}
-                onChange={(e) => setNewPhotoUrl(e.target.value)}
-                placeholder="https://exemple.com/ma-photo.jpg"
-                className="border-border/60 focus:border-[#D4A574] focus:ring-[#D4A574]/20"
-                onKeyDown={(e) => e.key === "Enter" && addPhoto()}
-              />
-              <Button
-                onClick={addPhoto}
-                variant="outline"
-                className="border-[#D4A574] text-[#D4A574] hover:bg-[#D4A574]/10 shrink-0"
-              >
-                Ajouter
-              </Button>
-            </div>
+            {customPhotos.length < 6 && (
+              <>
+                {/* Upload file */}
+                <div className="space-y-3">
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-border/60 rounded-xl p-6 cursor-pointer hover:border-[#D4A574] hover:bg-[#D4A574]/5 transition">
+                    <ImagePlus className="h-8 w-8 text-[#D4A574] mb-2" />
+                    <span className="text-sm text-muted-foreground">Cliquez pour uploader une photo</span>
+                    <span className="text-xs text-muted-foreground mt-1">JPG, PNG — max 5 Mo</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 5 * 1024 * 1024) { toast.error("Fichier trop volumineux (max 5 Mo)"); return; }
+                        const ext = file.name.split(".").pop() || "jpg";
+                        const path = `invitations/${wedding!.id}/${Date.now()}.${ext}`;
+                        const { error } = await supabase.storage.from("photos").upload(path, file);
+                        if (error) { toast.error("Erreur upload : " + error.message); return; }
+                        const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
+                        setCustomPhotos([...customPhotos, urlData.publicUrl]);
+                        toast.success("Photo ajoutée !");
+                      }}
+                    />
+                  </label>
+
+                  {/* OR paste URL */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex-1 h-px bg-border/60" />
+                    <span>ou collez une URL</span>
+                    <div className="flex-1 h-px bg-border/60" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newPhotoUrl}
+                      onChange={(e) => setNewPhotoUrl(e.target.value)}
+                      placeholder="https://exemple.com/ma-photo.jpg"
+                      className="border-border/60 focus:border-[#D4A574] focus:ring-[#D4A574]/20"
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addPhoto(); } }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={addPhoto}
+                      variant="outline"
+                      className="border-[#D4A574] text-[#D4A574] hover:bg-[#D4A574]/10 shrink-0"
+                    >
+                      Ajouter
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {customPhotos.length >= 6 && (
+              <p className="text-sm text-amber-600">Maximum de 6 photos atteint.</p>
+            )}
           </Card>
 
           {/* Actions */}

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useWedding, useInvalidateWedding } from "@/hooks/useWedding";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,20 @@ function InfoPage() {
   });
   const [faq, setFaq] = useState<Faq[]>([]);
 
+  const { data: firstGuest } = useQuery({
+    queryKey: ["first-guest", wedding?.id],
+    enabled: !!wedding,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("guests")
+        .select("invite_token")
+        .eq("wedding_id", wedding!.id)
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (wedding) {
       setForm({
@@ -39,7 +54,7 @@ function InfoPage() {
     }
   }, [wedding]);
 
-  if (!wedding) return <div className="p-8 text-muted-foreground">Créez d'abord votre mariage.</div>;
+  if (!wedding) return <div className="p-8 text-muted-foreground">Créez d'abord votre événement.</div>;
 
   async function save() {
     if (!wedding) return;
@@ -49,6 +64,10 @@ function InfoPage() {
     invalidate();
   }
 
+  const previewUrl = firstGuest?.invite_token
+    ? `${window.location.origin}/invite/${firstGuest.invite_token}`
+    : null;
+
   return (
     <div className="p-6 md:p-10">
       <div className="mb-8 flex items-center justify-between flex-wrap gap-3">
@@ -56,9 +75,15 @@ function InfoPage() {
           <h1 className="font-display text-3xl">Infos pratiques</h1>
           <p className="text-muted-foreground text-sm mt-1">Ce que verront vos invités sur leur page.</p>
         </div>
-        <Button variant="outline" asChild>
-          <a href="/" target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4 mr-2" />Aperçu invité</a>
-        </Button>
+        {previewUrl ? (
+          <Button variant="outline" asChild>
+            <a href={previewUrl} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4 mr-2" />Aperçu invité</a>
+          </Button>
+        ) : (
+          <Button variant="outline" disabled>
+            <ExternalLink className="h-4 w-4 mr-2" />Aperçu invité (ajoutez un invité d'abord)
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
