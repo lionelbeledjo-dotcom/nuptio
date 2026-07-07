@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard.index'
 import { Route as AuthenticatedDashboardInvitationRouteImport } from './routes/_authenticated/dashboard.invitation'
+import { Route as AuthenticatedDashboardGuestsRouteImport } from './routes/_authenticated/dashboard.guests'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -47,17 +48,25 @@ const AuthenticatedDashboardInvitationRoute =
     path: '/invitation',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardGuestsRoute =
+  AuthenticatedDashboardGuestsRouteImport.update({
+    id: '/guests',
+    path: '/guests',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
 }
@@ -67,6 +76,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/dashboard/guests': typeof AuthenticatedDashboardGuestsRoute
   '/_authenticated/dashboard/invitation': typeof AuthenticatedDashboardInvitationRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
@@ -76,16 +86,23 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/dashboard/guests'
     | '/dashboard/invitation'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard/invitation' | '/dashboard'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard/guests'
+    | '/dashboard/invitation'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/dashboard/guests'
     | '/_authenticated/dashboard/invitation'
     | '/_authenticated/dashboard/'
   fileRoutesById: FileRoutesById
@@ -140,16 +157,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardInvitationRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/guests': {
+      id: '/_authenticated/dashboard/guests'
+      path: '/guests'
+      fullPath: '/dashboard/guests'
+      preLoaderRoute: typeof AuthenticatedDashboardGuestsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
   }
 }
 
 interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardGuestsRoute: typeof AuthenticatedDashboardGuestsRoute
   AuthenticatedDashboardInvitationRoute: typeof AuthenticatedDashboardInvitationRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
+    AuthenticatedDashboardGuestsRoute: AuthenticatedDashboardGuestsRoute,
     AuthenticatedDashboardInvitationRoute:
       AuthenticatedDashboardInvitationRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
