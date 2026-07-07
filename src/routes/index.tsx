@@ -2,19 +2,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, Mail, Users, Sparkles, Check, Star } from "lucide-react";
+import { Heart, Mail, Users, Sparkles, Check, Star, Cake, Baby, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
 });
 
 const templates = [
-  { name: "Classique", tone: "from-[#F5E6E0] to-white" },
-  { name: "Bohème", tone: "from-amber-50 to-orange-100" },
-  { name: "Minimaliste", tone: "from-neutral-50 to-neutral-200" },
-  { name: "Floral", tone: "from-rose-50 to-pink-100" },
-  { name: "Oriental", tone: "from-amber-100 to-yellow-200" },
+  { name: "Classique Royal", tone: "from-[#F5E6E0] to-white" },
+  { name: "Bohème Terre", tone: "from-amber-50 to-orange-100" },
+  { name: "Minimaliste Noir", tone: "from-neutral-900 to-neutral-700 text-white" },
+  { name: "Floral Rose", tone: "from-rose-50 to-pink-100" },
+  { name: "Oriental Gold", tone: "from-amber-900 to-yellow-800 text-white" },
+  { name: "Africain Wax", tone: "from-orange-500 to-red-600 text-white" },
   { name: "Champêtre", tone: "from-lime-50 to-emerald-100" },
+  { name: "Luxe Velvet", tone: "from-purple-900 to-violet-800 text-white" },
 ];
 
 function Landing() {
@@ -42,11 +44,17 @@ function Landing() {
             <Sparkles className="h-3 w-3" /> Créé avec amour, pour les amoureux
           </div>
           <h1 className="font-display text-5xl leading-[1.05] tracking-tight md:text-7xl">
-            Vos invitations de mariage, <span className="italic text-gold">réinventées</span>
+            Vos invitations, <span className="italic text-gold">réinventées</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Créez des invitations digitales élégantes, envoyez-les à vos invités et gérez tout — RSVP, plan de table, menus — depuis un espace unique.
+            Mariages, anniversaires, baptêmes, fiançailles — créez des invitations digitales époustouflantes avec effets 3D, gérez vos RSVP et plan de table depuis un espace unique.
           </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full bg-blush/60 px-3 py-1"><Heart className="h-3 w-3 text-gold" /> Mariages</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-blush/60 px-3 py-1"><Cake className="h-3 w-3 text-gold" /> Anniversaires</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-blush/60 px-3 py-1"><Baby className="h-3 w-3 text-gold" /> Baptêmes</span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-blush/60 px-3 py-1"><Gift className="h-3 w-3 text-gold" /> Fiançailles</span>
+          </div>
           <div className="mt-10 flex flex-wrap justify-center gap-3">
             <Link to="/auth">
               <Button size="lg" className="bg-gold text-gold-foreground hover:bg-gold/90 h-12 px-8 text-base">
