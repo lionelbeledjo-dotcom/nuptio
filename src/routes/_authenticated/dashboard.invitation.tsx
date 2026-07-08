@@ -101,6 +101,10 @@ function InvitationPage() {
     [form.template_id]
   );
 
+  const isPremium = wedding
+    ? isPremiumUnlocked((wedding as any).plan ?? "free", (wedding as any).payment_status ?? "pending")
+    : false;
+
   if (!wedding) {
     return (
       <div className="p-8 text-muted-foreground">
@@ -246,6 +250,60 @@ function InvitationPage() {
               previewData={previewData}
             />
           </Card>
+
+          {/* Musique — Premium uniquement */}
+          {isPremium && (
+            <Card className="p-6 border-border/60 shadow-sm space-y-4">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <h2 className="font-display text-xl flex items-center gap-2" style={{ color: "#D4A574" }}>
+                  <Music className="w-5 h-5" />
+                  Musique d'ambiance
+                </h2>
+                <span className="text-xs uppercase tracking-wider px-2 py-1 rounded-full bg-[#D4A574]/10 text-[#D4A574] font-medium">
+                  Premium
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Collez le lien direct vers un fichier audio (mp3, ogg, wav). Vos invités pourront l'écouter à l'ouverture de l'invitation.
+              </p>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">URL du fichier audio</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="url"
+                    value={musicUrl}
+                    onChange={(e) => setMusicUrl(e.target.value)}
+                    placeholder="https://exemple.com/notre-chanson.mp3"
+                    className="border-border/60 focus:border-[#D4A574] focus:ring-[#D4A574]/20"
+                  />
+                  {musicUrl && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setMusicUrl("")}
+                      className="shrink-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {musicUrl.trim() && (
+                <div className="rounded-lg border border-border/60 bg-muted/20 p-4 space-y-2">
+                  <p className="text-xs text-muted-foreground">Aperçu</p>
+                  <audio
+                    key={musicUrl}
+                    controls
+                    src={musicUrl}
+                    className="w-full"
+                    onError={() => toast.error("Impossible de lire ce fichier audio. Vérifiez l'URL.")}
+                  >
+                    Votre navigateur ne supporte pas la lecture audio.
+                  </audio>
+                </div>
+              )}
+            </Card>
+          )}
 
           {/* Content Form */}
           <Card className="p-6 border-border/60 shadow-sm space-y-5">
