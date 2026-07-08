@@ -353,11 +353,30 @@ function InvitationPage() {
                         if (file.size > 5 * 1024 * 1024) { toast.error("Fichier trop volumineux (max 5 Mo)"); return; }
                         const ext = file.name.split(".").pop() || "jpg";
                         const path = `invitations/${wedding!.id}/${Date.now()}.${ext}`;
-                        const { error } = await supabase.storage.from("photos").upload(path, file);
-                        if (error) { toast.error("Erreur upload : " + error.message); return; }
-                        const { data: urlData } = supabase.storage.from("photos").getPublicUrl(path);
-                        setCustomPhotos([...customPhotos, urlData.publicUrl]);
-                        toast.success("Photo ajoutée !");
+                        const bucketNames = ["photos", "PHOTOS", "Photos"];
+                        let uploaded = false;
+                        for (const bucket of bucketNames) {
+                          const { error } = await supabase.storage.from(bucket).upload(path, file);
+                          if (!error) {
+                            const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+                            setCustomPhotos([...customPhotos, urlData.publicUrl]);
+                            toast.success("Photo ajoutée !");
+                            uploaded = true;
+                            break;
+                          }
+                          if (error && !error.message.includes("not found")) {
+                            toast.error("Erreur upload : " + error.message);
+                            return;
+                          }
+                        }
+                        if (!uploaded) {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            setCustomPhotos([...customPhotos, reader.result as string]);
+                            toast.success("Photo ajoutée (en local) !");
+                          };
+                          reader.readAsDataURL(file);
+                        }
                       }}
                     />
                   </label>
