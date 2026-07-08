@@ -269,6 +269,8 @@ export type Database = {
           map_url: string
           partner1_name: string
           partner2_name: string
+          payment_status: Database["public"]["Enums"]["wedding_payment_status"]
+          plan: Database["public"]["Enums"]["wedding_plan"]
           reception_time: string
           template_id: string
           venue_ceremony: string
