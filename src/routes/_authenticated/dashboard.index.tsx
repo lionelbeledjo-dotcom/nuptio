@@ -104,7 +104,19 @@ function OnboardingForm() {
             </div>
             <div>
               <Label>{labels.date}</Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              <Input
+                type="date"
+                value={date}
+                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v && new Date(`${v}T00:00:00`) < new Date(new Date().toDateString())) {
+                    toast.error("La date ne peut pas être dans le passé");
+                    return;
+                  }
+                  setDate(v);
+                }}
+              />
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-gold text-gold-foreground hover:bg-gold/90">
               {loading ? "Création…" : `Créer mon ${labels.title}`}
@@ -132,7 +144,11 @@ function DashboardContent({ eventId, eventDate }: { eventId: string; eventDate: 
     },
   });
 
-  const countdown = eventDate ? differenceInDays(new Date(eventDate), new Date()) : null;
+  const parsedEventDate = eventDate ? new Date(`${eventDate}T00:00:00`) : null;
+  const isValidDate = parsedEventDate && !isNaN(parsedEventDate.getTime());
+  const rawCountdown = isValidDate ? differenceInDays(parsedEventDate, new Date()) : null;
+  const isPast = rawCountdown !== null && rawCountdown < 0;
+  const countdown = isPast ? null : rawCountdown;
 
   return (
     <div className="p-6 md:p-10 space-y-8">
@@ -140,8 +156,17 @@ function DashboardContent({ eventId, eventDate }: { eventId: string; eventDate: 
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">Compte à rebours</p>
-            <div className="font-display text-6xl text-gold mt-2">{countdown ?? "—"}</div>
-            <p className="text-sm text-muted-foreground mt-1">jours avant le jour J</p>
+            {isPast ? (
+              <>
+                <div className="font-display text-4xl text-gold mt-2">Événement passé</div>
+                <p className="text-sm text-muted-foreground mt-1">Merci d'avoir célébré avec Nuptio</p>
+              </>
+            ) : (
+              <>
+                <div className="font-display text-6xl text-gold mt-2">{countdown ?? "—"}</div>
+                <p className="text-sm text-muted-foreground mt-1">jours avant le jour J</p>
+              </>
+            )}
           </div>
           <Calendar className="h-16 w-16 text-gold/40" />
         </div>
