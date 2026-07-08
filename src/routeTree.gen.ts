@@ -22,6 +22,10 @@ import { Route as AuthenticatedDashboardSeatingRouteImport } from './routes/_aut
 import { Route as AuthenticatedDashboardRsvpRouteImport } from './routes/_authenticated/dashboard.rsvp'
 import { Route as AuthenticatedDashboardInvitationRouteImport } from './routes/_authenticated/dashboard.invitation'
 import { Route as AuthenticatedDashboardInfoRouteImport } from './routes/_authenticated/dashboard.info'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedAdminSubscriptionsRouteImport } from './routes/_authenticated/admin.subscriptions'
+import { Route as AuthenticatedAdminRevenueRouteImport } from './routes/_authenticated/admin.revenue'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedDashboardGuestsRouteImport } from './routes/_authenticated/dashboard.guests'
 
 const AuthRoute = AuthRouteImport.update({
@@ -62,6 +66,26 @@ const AuthenticatedDashboardIndexRoute =
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminSubscriptionsRoute = AuthenticatedAdminSubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminRevenueRoute = AuthenticatedAdminRevenueRouteImport.update({
+  id: '/revenue',
+  path: '/revenue',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminSettingsRoute = AuthenticatedAdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const AuthenticatedDashboardSettingsRoute =
@@ -114,6 +138,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/seating': typeof AuthenticatedDashboardSeatingRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
+  '/admin/revenue': typeof AuthenticatedAdminRevenueRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -127,6 +155,10 @@ export interface FileRoutesByTo {
   '/dashboard/seating': typeof AuthenticatedDashboardSeatingRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
+  '/admin/revenue': typeof AuthenticatedAdminRevenueRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -144,6 +176,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/seating': typeof AuthenticatedDashboardSeatingRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
+  '/_authenticated/admin/revenue': typeof AuthenticatedAdminRevenueRoute
+  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -161,6 +197,10 @@ export interface FileRouteTypes {
     | '/dashboard/seating'
     | '/dashboard/settings'
     | '/admin/'
+    | '/admin/users'
+    | '/admin/subscriptions'
+    | '/admin/revenue'
+    | '/admin/settings'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -174,6 +214,10 @@ export interface FileRouteTypes {
     | '/dashboard/seating'
     | '/dashboard/settings'
     | '/admin'
+    | '/admin/users'
+    | '/admin/subscriptions'
+    | '/admin/revenue'
+    | '/admin/settings'
     | '/dashboard'
   id:
     | '__root__'
@@ -190,6 +234,10 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/seating'
     | '/_authenticated/dashboard/settings'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/users'
+    | '/_authenticated/admin/subscriptions'
+    | '/_authenticated/admin/revenue'
+    | '/_authenticated/admin/settings'
     | '/_authenticated/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -258,6 +306,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/subscriptions': {
+      id: '/_authenticated/admin/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/admin/subscriptions'
+      preLoaderRoute: typeof AuthenticatedAdminSubscriptionsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/revenue': {
+      id: '/_authenticated/admin/revenue'
+      path: '/revenue'
+      fullPath: '/admin/revenue'
+      preLoaderRoute: typeof AuthenticatedAdminRevenueRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/dashboard/settings': {
       id: '/_authenticated/dashboard/settings'
       path: '/settings'
@@ -305,10 +381,18 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAdminSubscriptionsRoute: typeof AuthenticatedAdminSubscriptionsRoute
+  AuthenticatedAdminRevenueRoute: typeof AuthenticatedAdminRevenueRoute
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedAdminSubscriptionsRoute: AuthenticatedAdminSubscriptionsRoute,
+  AuthenticatedAdminRevenueRoute: AuthenticatedAdminRevenueRoute,
+  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
