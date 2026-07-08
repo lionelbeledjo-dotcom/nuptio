@@ -71,6 +71,61 @@ function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label
   );
 }
 
+function EventPlanRow({ evt }: { evt: any }) {
+  const qc = useQueryClient();
+  const currentPlan = (evt.plan ?? "free") as Plan;
+  const currentStatus = (evt.payment_status ?? "pending") as PaymentStatus;
+
+  async function updatePlan(plan: Plan) {
+    const { error } = await supabase.from("weddings").update({ plan }).eq("id", evt.id);
+    if (error) return toast.error(error.message);
+    toast.success("Formule mise à jour");
+    qc.invalidateQueries({ queryKey: ["admin-users"] });
+    qc.invalidateQueries({ queryKey: ["event"] });
+  }
+
+  async function togglePaid() {
+    const next: PaymentStatus = currentStatus === "paid" ? "pending" : "paid";
+    const { error } = await supabase.from("weddings").update({ payment_status: next }).eq("id", evt.id);
+    if (error) return toast.error(error.message);
+    toast.success(next === "paid" ? "Marqué comme payé" : "Passé en attente");
+    qc.invalidateQueries({ queryKey: ["admin-users"] });
+    qc.invalidateQueries({ queryKey: ["event"] });
+  }
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <Badge className="bg-gold/20 text-gold border-gold/30 text-[10px]">
+        {getEventLabel(evt.template_id)} — {evt.partner1_name}
+      </Badge>
+      <Select value={currentPlan} onValueChange={(v) => updatePlan(v as Plan)}>
+        <SelectTrigger className="h-7 w-28 text-xs bg-neutral-800 border-white/10 text-white">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {(Object.keys(PLAN_INFO) as Plan[]).map((p) => (
+            <SelectItem key={p} value={p}>
+              {PLAN_INFO[p].label} · {PLAN_INFO[p].price}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button
+        size="sm"
+        variant={currentStatus === "paid" ? "default" : "outline"}
+        onClick={togglePaid}
+        className={
+          currentStatus === "paid"
+            ? "h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+            : "h-7 text-xs border-amber-500 text-amber-400 hover:bg-amber-500/10"
+        }
+      >
+        {currentStatus === "paid" ? "Payé ✓" : "En attente"}
+      </Button>
+    </div>
+  );
+}
+
 function AdminUsersTable() {
   const { data: users, isLoading } = useQuery({
     queryKey: ["admin-users"],
