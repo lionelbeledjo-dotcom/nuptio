@@ -1,12 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Calendar, TrendingUp, UserCheck, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { getEventLabel } from "@/lib/constants";
+import { PLAN_INFO, type Plan, type PaymentStatus } from "@/lib/plans";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   ssr: false,
@@ -116,7 +120,7 @@ function AdminUsersTable() {
               <th className="text-left p-3 font-medium text-neutral-300">Utilisateur</th>
               <th className="text-left p-3 font-medium text-neutral-300">Email</th>
               <th className="text-left p-3 font-medium text-neutral-300">Inscription</th>
-              <th className="text-left p-3 font-medium text-neutral-300">Événements</th>
+              <th className="text-left p-3 font-medium text-neutral-300">Événements & formule</th>
               <th className="text-left p-3 font-medium text-neutral-300">Invités</th>
               <th className="text-left p-3 font-medium text-neutral-300">Statut</th>
             </tr>
@@ -141,12 +145,10 @@ function AdminUsersTable() {
                   {format(new Date(user.created_at), "dd/MM/yyyy", { locale: fr })}
                 </td>
                 <td className="p-3">
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-col gap-2">
                     {user.events.length === 0 && <span className="text-neutral-500">Aucun</span>}
                     {user.events.map((evt) => (
-                      <Badge key={evt.id} className="bg-gold/20 text-gold border-gold/30 text-[10px]">
-                        {getEventLabel(evt.template_id)} — {evt.partner1_name}
-                      </Badge>
+                      <EventPlanRow key={evt.id} evt={evt} />
                     ))}
                   </div>
                 </td>
