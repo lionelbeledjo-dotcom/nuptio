@@ -200,6 +200,7 @@ export type Database = {
           faq: Json
           id: string
           map_url: string | null
+          music_url: string | null
           partner1_name: string
           partner2_name: string
           payment_status: Database["public"]["Enums"]["wedding_payment_status"]
@@ -219,6 +220,7 @@ export type Database = {
           faq?: Json
           id?: string
           map_url?: string | null
+          music_url?: string | null
           partner1_name: string
           partner2_name: string
           payment_status?: Database["public"]["Enums"]["wedding_payment_status"]
@@ -238,6 +240,7 @@ export type Database = {
           faq?: Json
           id?: string
           map_url?: string | null
+          music_url?: string | null
           partner1_name?: string
           partner2_name?: string
           payment_status?: Database["public"]["Enums"]["wedding_payment_status"]
@@ -267,6 +270,7 @@ export type Database = {
           guest_id: string
           guest_name: string
           map_url: string
+          music_url: string
           partner1_name: string
           partner2_name: string
           payment_status: Database["public"]["Enums"]["wedding_payment_status"]
