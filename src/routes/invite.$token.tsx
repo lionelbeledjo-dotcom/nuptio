@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { Logo } from "@/components/Logo";
 import InviteEnvelope from "@/components/InviteEnvelope";
 import Photo3D from "@/components/Photo3D";
 import { motion, AnimatePresence } from "framer-motion";
+import { isPremiumUnlocked, type Plan, type PaymentStatus } from "@/lib/plans";
+import { Volume2, VolumeX } from "lucide-react";
 
 export const Route = createFileRoute("/invite/$token")({
   head: () => ({
@@ -25,6 +27,65 @@ export const Route = createFileRoute("/invite/$token")({
   }),
   component: InvitePage,
 });
+
+/* ─── Slow-connection / reduced-motion helpers ─────────────────── */
+
+function useLightMode() {
+  const [light, setLight] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Respect user's OS-level reduced motion preference.
+    const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    // Network Information API (Chrome/Android). Safari iOS won't have it → default to full effects.
+    const conn: any = (navigator as any).connection;
+    const slow = conn && (conn.saveData || ["slow-2g", "2g", "3g"].includes(conn.effectiveType));
+    setLight(Boolean(prefersReduced || slow));
+  }, []);
+  return light;
+}
+
+/* ─── Music Toggle (Premium only) ──────────────────────────────── */
+
+function MusicToggle({ src }: { src: string }) {
+  const [muted, setMuted] = useState(true); // start muted — Safari iOS blocks autoplay with sound
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio(src);
+    audio.loop = true;
+    audio.volume = 0.35;
+    audio.muted = true;
+    (audio as any).playsInline = true;
+    audio.play().catch(() => {
+      // Silent failure — some browsers still block; user gesture will unmute.
+    });
+    audioRef.current = audio;
+    return () => {
+      audio.pause();
+      audio.src = "";
+    };
+  }, [src]);
+
+  function toggle() {
+    const a = audioRef.current;
+    if (!a) return;
+    const next = !muted;
+    a.muted = next;
+    if (!next) a.play().catch(() => {});
+    setMuted(next);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={muted ? "Activer la musique" : "Couper la musique"}
+      className="fixed top-4 right-4 z-[60] h-11 w-11 rounded-full bg-white/90 backdrop-blur-sm border border-gold/40 flex items-center justify-center shadow-lg hover:bg-white transition"
+    >
+      {muted ? <VolumeX className="h-5 w-5 text-gold" /> : <Volume2 className="h-5 w-5 text-gold" />}
+    </button>
+  );
+}
 
 /* ─── Gold Particle Background ─────────────────────────────────── */
 
@@ -132,12 +193,22 @@ function InvitePage() {
   const [invite, setInvite] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [envelopeOpened, setEnvelopeOpened] = useState(false);
+  const lightMode = useLightMode();
 
   useEffect(() => {
     (async () => {
       const { data, error } = await supabase.rpc("get_invite_by_token", { _token: token });
       if (error) console.error(error);
-      setInvite(data?.[0] ?? null);
+      const row = data?.[0] ?? null;
+      setInvite(row);
+      // Non-premium (or slow connection): skip the envelope reveal entirely.
+      if (row) {
+        const premium = isPremiumUnlocked(
+          (row.plan ?? "free") as Plan,
+          (row.payment_status ?? "pending") as PaymentStatus,
+        );
+        if (!premium) setEnvelopeOpened(true);
+      }
       setLoading(false);
     })();
   }, [token]);
@@ -180,12 +251,20 @@ function InvitePage() {
   }
 
   const wedding_date_str = invite.wedding_date ? format(new Date(invite.wedding_date), "EEEE d MMMM yyyy", { locale: fr }) : "Date à venir";
+  const isPremium = isPremiumUnlocked(
+    (invite.plan ?? "free") as Plan,
+    (invite.payment_status ?? "pending") as PaymentStatus,
+  );
+  const showImmersive = isPremium && !lightMode;
 
   return (
     <>
-      {/* Envelope Opening Phase */}
+      {/* Immersive music toggle (Premium only, if audio configured on the event) */}
+      {isPremium && invite.music_url && <MusicToggle src={invite.music_url} />}
+
+      {/* Envelope Opening Phase — Premium only */}
       <AnimatePresence>
-        {!envelopeOpened && (
+        {!envelopeOpened && showImmersive && (
           <motion.div
             className="fixed inset-0 z-50"
             exit={{ opacity: 0 }}
@@ -214,8 +293,8 @@ function InvitePage() {
             transition={{ duration: 1, delay: 0.3 }}
             className="min-h-screen bg-gradient-to-b from-[#FDF8F5] via-blush/20 to-[#FDF8F5] pb-16 relative"
           >
-            <ParallaxBackground />
-            <GoldParticles />
+            {showImmersive && <ParallaxBackground />}
+            {showImmersive && <GoldParticles />}
 
             {/* Header */}
             <motion.header
@@ -432,7 +511,13 @@ function InvitePage() {
               viewport={{ once: true }}
               className="text-center mt-10 text-xs text-muted-foreground relative z-10"
             >
-              Invitation créée avec <span className="text-gold">Nuptio</span>
+              {!isPremium ? (
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/70 border border-gold/30">
+                  Créé avec <span className="text-gold font-medium">Nuptio</span>
+                </span>
+              ) : (
+                <>Invitation créée avec <span className="text-gold">Nuptio</span></>
+              )}
             </motion.footer>
           </motion.div>
         )}

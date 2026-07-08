@@ -11,6 +11,8 @@ import { CheckCircle2, Clock, XCircle, Users, Calendar, Heart, Cake, Baby, Gift,
 import { differenceInDays } from "date-fns";
 import { toast } from "sonner";
 import { EVENT_TYPES, getEventLabels, type EventType } from "@/lib/constants";
+import { PLAN_INFO, guestCap, type Plan, type PaymentStatus } from "@/lib/plans";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
   ssr: false,
@@ -21,7 +23,14 @@ function DashboardHome() {
   const { data: event, isLoading } = useEvent();
   if (isLoading) return <div className="p-8 text-muted-foreground">Chargement…</div>;
   if (!event) return <OnboardingForm />;
-  return <DashboardContent eventId={event.id} eventDate={event.wedding_date} />;
+  return (
+    <DashboardContent
+      eventId={event.id}
+      eventDate={event.wedding_date}
+      plan={(event.plan ?? "free") as Plan}
+      paymentStatus={(event.payment_status ?? "pending") as PaymentStatus}
+    />
+  );
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -128,7 +137,17 @@ function OnboardingForm() {
   );
 }
 
-function DashboardContent({ eventId, eventDate }: { eventId: string; eventDate: string | null }) {
+function DashboardContent({
+  eventId,
+  eventDate,
+  plan,
+  paymentStatus,
+}: {
+  eventId: string;
+  eventDate: string | null;
+  plan: Plan;
+  paymentStatus: PaymentStatus;
+}) {
   const { data: stats } = useQuery({
     queryKey: ["rsvp-stats", eventId],
     queryFn: async () => {
@@ -150,6 +169,12 @@ function DashboardContent({ eventId, eventDate }: { eventId: string; eventDate: 
   const isPast = rawCountdown !== null && rawCountdown < 0;
   const countdown = isPast ? null : rawCountdown;
 
+  const cap = guestCap(plan, paymentStatus);
+  const used = stats?.total ?? 0;
+  const remaining = Math.max(0, cap - used);
+  const planInfo = PLAN_INFO[plan];
+  const isLocked = plan !== "free" && paymentStatus !== "paid";
+
   return (
     <div className="p-6 md:p-10 space-y-8">
       <Card className="p-8 bg-gradient-to-br from-blush/50 to-white border-gold/20">
@@ -169,6 +194,45 @@ function DashboardContent({ eventId, eventDate }: { eventId: string; eventDate: 
             )}
           </div>
           <Calendar className="h-16 w-16 text-gold/40" />
+        </div>
+      </Card>
+
+      <Card className="p-6 border-border/60">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">Formule active</p>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge className={`${planInfo.color} border-0 text-sm px-3 py-1`}>{planInfo.label}</Badge>
+              {isLocked && (
+                <Badge variant="outline" className="border-amber-500 text-amber-700">
+                  Paiement en attente
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              {used} / {cap} invités — {remaining} restant{remaining > 1 ? "s" : ""}
+            </p>
+            <div className="mt-2 h-2 w-64 max-w-full rounded-full bg-neutral-100 overflow-hidden">
+              <div
+                className="h-full bg-gold transition-all"
+                style={{ width: `${Math.min(100, (used / cap) * 100)}%` }}
+              />
+            </div>
+          </div>
+          {plan !== "premium" && (
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground max-w-xs">
+                Pour passer à une formule supérieure, contactez-nous — l'activation est
+                effectuée manuellement depuis l'espace admin.
+              </p>
+              <a
+                href="mailto:contact@nuptio.app?subject=Passer%20à%20Premium"
+                className="inline-block mt-2 text-sm text-gold hover:underline"
+              >
+                Passer à Premium →
+              </a>
+            </div>
+          )}
         </div>
       </Card>
 
