@@ -104,7 +104,19 @@ function OnboardingForm() {
             </div>
             <div>
               <Label>{labels.date}</Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              <Input
+                type="date"
+                value={date}
+                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v && new Date(`${v}T00:00:00`) < new Date(new Date().toDateString())) {
+                    toast.error("La date ne peut pas être dans le passé");
+                    return;
+                  }
+                  setDate(v);
+                }}
+              />
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-gold text-gold-foreground hover:bg-gold/90">
               {loading ? "Création…" : `Créer mon ${labels.title}`}
