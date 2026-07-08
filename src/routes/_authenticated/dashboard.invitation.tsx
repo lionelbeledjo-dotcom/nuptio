@@ -22,6 +22,8 @@ import { FileDown, QrCode, ImagePlus, X, ExternalLink } from "lucide-react";
 import { TemplateGrid, EVENT_TYPES, TEMPLATES } from "@/components/templates/EventTemplates";
 import { exportInvitationPdf } from "@/lib/exportPdf";
 import { QRInvite } from "@/components/QRInvite";
+import { isPremiumUnlocked } from "@/lib/plans";
+import { Music } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard/invitation")({
   ssr: false,
@@ -44,6 +46,7 @@ function InvitationPage() {
   const [customPhotos, setCustomPhotos] = useState<string[]>([]);
   const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [musicUrl, setMusicUrl] = useState("");
 
   const { data: firstGuest } = useQuery({
     queryKey: ["first-guest-invite", wedding?.id],
@@ -79,6 +82,7 @@ function InvitationPage() {
 
       setEventType(parsedEventType);
       setCustomPhotos(parsedPhotos);
+      setMusicUrl((wedding as any).music_url ?? "");
       setForm({
         partner1_name: wedding.partner1_name ?? "",
         partner2_name: wedding.partner2_name ?? "",
@@ -123,6 +127,7 @@ function InvitationPage() {
       venue_ceremony: form.venue_ceremony,
       custom_message: buildCustomMessage(),
       template_id: form.template_id,
+      music_url: musicUrl.trim() || null,
     };
     const { error } = await supabase
       .from("weddings")
