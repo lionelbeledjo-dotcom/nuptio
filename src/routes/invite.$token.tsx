@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,7 @@ function useLightMode() {
 
 function MusicToggle({ src }: { src: string }) {
   const [muted, setMuted] = useState(true); // start muted — Safari iOS blocks autoplay with sound
-  const audioRef = useState<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const audio = new Audio(src);
@@ -59,16 +59,15 @@ function MusicToggle({ src }: { src: string }) {
     audio.play().catch(() => {
       // Silent failure — some browsers still block; user gesture will unmute.
     });
-    audioRef[1](audio);
+    audioRef.current = audio;
     return () => {
       audio.pause();
       audio.src = "";
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
 
   function toggle() {
-    const a = audioRef[0];
+    const a = audioRef.current;
     if (!a) return;
     const next = !muted;
     a.muted = next;
